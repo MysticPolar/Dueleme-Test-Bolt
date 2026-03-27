@@ -1,0 +1,220 @@
+// ═══════════════════════════════════════════════════════════════
+// 读了么 · Reading Screen (阅读)
+// ═══════════════════════════════════════════════════════════════
+
+import { useState } from "react";
+import { READING_ARTICLES } from "../data/content.js";
+import { COLORS, FONTS as F, TEXTURES, CARD_COLORS, SPACE, LAYOUT } from "../styles/tokens.js";
+import { OrnateRule, SectionLabel } from "../components/Primitives.jsx";
+
+// ── Article Card ──────────────────────────────────────────────
+function ArticleCard({ article, index, onOpen }) {
+  return (
+    <div
+      onClick={() => onOpen(article)}
+      style={{
+        border: `1.5px solid ${COLORS.rule}`,
+        ...TEXTURES.paperLight,
+        marginBottom: SPACE[4], overflow: "hidden",
+        cursor: "pointer", position: "relative",
+        animation: `duleme-fade-up 0.4s ease ${0.08 + index * 0.1}s both`,
+        transition: "box-shadow 0.2s ease",
+      }}
+      onMouseEnter={e => e.currentTarget.style.boxShadow = `3px 4px 0 ${COLORS.ink}`}
+      onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}
+    >
+      {/* Left 3px accent bar — "book spine" per brand spec */}
+      <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 3, background: CARD_COLORS[article.color] }} />
+
+      <div style={{ padding: `${SPACE[4]}px ${SPACE[4]}px ${SPACE[4]}px ${SPACE[4] + 3}px` }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: SPACE[2] }}>
+          <div style={{
+            fontFamily: F.ui, fontSize: 10, fontWeight: 700,
+            letterSpacing: 1.5,
+            color: CARD_COLORS[article.color],
+          }}>
+            {article.tag} · {article.date}
+          </div>
+          <div style={{ fontFamily: F.ui, fontSize: 10, color: COLORS.muted, letterSpacing: 1 }}>
+            {article.readTime}
+          </div>
+        </div>
+
+        <div style={{
+          fontFamily: F.chinese, fontWeight: 700, fontSize: 16,
+          lineHeight: 1.4, color: COLORS.ink, marginBottom: SPACE[2],
+        }}>
+          {article.title}
+        </div>
+
+        <div style={{
+          fontFamily: F.body, fontStyle: "italic", fontSize: 11,
+          color: COLORS.muted, lineHeight: 1.5, marginBottom: SPACE[3],
+        }}>
+          {article.en}
+        </div>
+
+        <div style={{
+          fontFamily: F.chinese, fontSize: 12,
+          lineHeight: 1.8, color: COLORS.muted, marginBottom: SPACE[3],
+          borderLeft: `2px solid ${COLORS.paperAged}`,
+          paddingLeft: SPACE[3],
+        }}>
+          {article.preview}
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ fontFamily: F.ui, fontSize: 10, color: COLORS.muted, letterSpacing: 1 }}>
+            {article.author}
+          </div>
+          <div style={{
+            fontFamily: F.ui, fontSize: 10, fontWeight: 700,
+            color: COLORS.ink, letterSpacing: 1,
+          }}>
+            阅读 →
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Filter Tabs ───────────────────────────────────────────────
+const FILTERS = ["全部", "健康", "财富", "人际", "文学", "思辨", "职场"];
+
+function FilterTabs({ active, onSelect }) {
+  return (
+    <div style={{ display: "flex", gap: SPACE[2], overflowX: "auto", margin: `0 -${SPACE[4]}px`, padding: `0 ${SPACE[4]}px ${SPACE[3]}px` }}>
+      {FILTERS.map((f) => (
+        <button
+          key={f}
+          onClick={() => onSelect(f)}
+          style={{
+            flexShrink: 0,
+            fontFamily: F.ui, fontSize: 10, fontWeight: 700,
+            letterSpacing: 1,
+            padding: `${SPACE[2]}px ${SPACE[3]}px`,
+            minHeight: LAYOUT.minTouchTarget,
+            border: `1px solid ${active === f ? COLORS.ink : COLORS.paperAged}`,
+            background: active === f ? COLORS.ink : "transparent",
+            color: active === f ? COLORS.paper : COLORS.muted,
+            cursor: "pointer", transition: "all 0.15s",
+          }}
+        >
+          {f}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ── Full Reading Screen ───────────────────────────────────────
+export default function ReadingScreen() {
+  const [filter, setFilter] = useState("全部");
+  const [openArticle, setOpenArticle] = useState(null);
+
+  const filtered = filter === "全部"
+    ? READING_ARTICLES
+    : READING_ARTICLES.filter(a => a.tag === filter);
+
+  if (openArticle) {
+    return (
+      <div style={{ padding: `${SPACE[3]}px ${SPACE[4]}px ${SPACE[9]}px` }}>
+        <button
+          onClick={() => setOpenArticle(null)}
+          style={{
+            fontFamily: F.ui, fontSize: 10, fontWeight: 700, letterSpacing: 2,
+            textTransform: "uppercase", color: COLORS.muted,
+            background: "none", border: "none", cursor: "pointer",
+            marginBottom: SPACE[4],
+            minHeight: LAYOUT.minTouchTarget,
+            padding: `${SPACE[2]}px 0`,
+          }}
+        >
+          ← 返回
+        </button>
+
+        <div style={{ animation: "duleme-fade-up 0.4s ease both" }}>
+          <div style={{
+            fontFamily: F.ui, fontSize: 10, fontWeight: 700, letterSpacing: 2,
+            color: CARD_COLORS[openArticle.color],
+            marginBottom: SPACE[2],
+          }}>
+            {openArticle.tag} · {openArticle.date}
+          </div>
+          <div style={{
+            fontFamily: F.chinese, fontWeight: 900, fontSize: 22,
+            lineHeight: 1.35, color: COLORS.ink, marginBottom: SPACE[2],
+          }}>
+            {openArticle.title}
+          </div>
+          <div style={{
+            fontFamily: F.body, fontStyle: "italic", fontSize: 12,
+            color: COLORS.muted, lineHeight: 1.6, marginBottom: SPACE[4],
+          }}>
+            {openArticle.en}
+          </div>
+          <OrnateRule />
+          <div style={{
+            display: "flex", justifyContent: "space-between",
+            marginBottom: SPACE[4],
+          }}>
+            <div style={{ fontFamily: F.ui, fontSize: 10, color: COLORS.muted, letterSpacing: 1 }}>
+              {openArticle.author}
+            </div>
+            <div style={{ fontFamily: F.ui, fontSize: 10, color: COLORS.muted, letterSpacing: 1 }}>
+              {openArticle.readTime} · {openArticle.date}
+            </div>
+          </div>
+          {/* Article body placeholder */}
+          <div style={{ fontFamily: F.chinese, fontSize: 14, lineHeight: 2, color: COLORS.ink }}>
+            {openArticle.preview}<br /><br />
+            心理学研究表明，人类对自己未来的规划往往存在系统性的偏差。我们倾向于认为，明天的自己会更有耐心，更有条理，更能抵抗诱惑。但事实上，"明天的自己"往往和今天的我们并没有太大区别。<br /><br />
+            这种现象被称为"计划谬误"。它不只影响个人决策，也影响集体项目、政府政策，乃至人类文明的整体走向。<br /><br />
+            也许，接受不完美的今天，比永远期待完美的明天，更接近智慧。
+          </div>
+          <OrnateRule my={SPACE[6]} symbol="— 全文完 —" />
+          <div style={{ textAlign: "center", fontFamily: F.body, fontStyle: "italic", fontSize: 11, color: COLORS.muted, opacity: 0.5 }}>
+            "好书会有终章，好问题永不落幕。"<br />— 猫头鹰邮局
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: `${SPACE[3]}px ${SPACE[4]}px ${SPACE[4]}px` }}>
+
+      <div style={{ textAlign: "center", marginBottom: SPACE[4], animation: "duleme-fade-up 0.4s ease both" }}>
+        <div style={{ fontFamily: F.chinese, fontWeight: 900, fontSize: 20, color: COLORS.ink, marginBottom: SPACE[1] }}>
+          阅读专栏
+        </div>
+        <div style={{ fontFamily: F.body, fontStyle: "italic", fontSize: 11, color: COLORS.muted, letterSpacing: 1 }}>
+          阅读室 · 猫头鹰邮局精选文集
+        </div>
+      </div>
+
+      <OrnateRule symbol="✦ ◆ ✦" />
+
+      <FilterTabs active={filter} onSelect={setFilter} />
+
+      {filtered.map((article, i) => (
+        <ArticleCard key={article.id} article={article} index={i} onOpen={setOpenArticle} />
+      ))}
+
+      {filtered.length === 0 && (
+        <div style={{ textAlign: "center", padding: `${SPACE[8]}px 0`, fontFamily: F.body, fontStyle: "italic", fontSize: 13, color: COLORS.muted, opacity: 0.5 }}>
+          该分类暂无文章
+        </div>
+      )}
+
+      <OrnateRule symbol="— 更多即将推出 —" />
+      <div style={{ textAlign: "center", padding: `${SPACE[4]}px 0` }}>
+        <div style={{ fontFamily: F.body, fontStyle: "italic", fontSize: 11, color: COLORS.muted, opacity: 0.4, lineHeight: 1.8 }}>
+          "每一个问题，都会让阅读室再长出一页。"<br />
+          — 猫头鹰邮局
+        </div>
+      </div>
+    </div>
+  );
+}

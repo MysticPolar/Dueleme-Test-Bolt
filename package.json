@@ -1,0 +1,23 @@
+{
+  "name": "duleme-app",
+  "version": "2.0.0",
+  "private": true,
+  "description": "读了么 (Dúle Me) — Read Dangerously · The Owlery Press",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host --port 3000",
+    "build": "vite build",
+    "preview": "vite preview",
+    "expo:start": "npm run start --prefix expo-app",
+    "expo:start:lan": "npm run start:lan --prefix expo-app",
+    "expo:qr": "npm run qr --prefix expo-app"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.1"
+  }
+}
