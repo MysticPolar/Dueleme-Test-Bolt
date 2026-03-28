@@ -170,40 +170,63 @@ export default function ArticleContent({ R, isStreaming, stamped }) {
 
       {/* Recommendations */}
       <StreamIn visible={R.recommendations?.length > 0}>
-        <div style={{ padding: "24px 20px 8px", borderTop: `3px double ${COLORS.rule}` }}>
-          <SectionTag dark>{"\u5EF6\u4F38\u63A8\u8350 \u00B7 \u732B\u5934\u9E70\u90AE\u5C40\u5907\u9009\u4E66\u76EE"}</SectionTag>
-          {(R.recommendations || []).map((rec, i) => (
-            <div key={i} style={{
-              marginBottom: 16, padding: 16,
-              borderBottom: i < R.recommendations.length - 1 ? "1px solid rgba(42,31,14,0.1)" : "none",
-              display: "flex", gap: 14, alignItems: "flex-start",
-              animation: `duleme-fade-up 0.4s ease ${i * 0.1}s both`,
-            }}>
-              <div style={{
-                width: 32, height: 46, flexShrink: 0,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontFamily: F.chinese, fontWeight: 700, fontSize: 8,
-                color: COLORS.paper, writingMode: "vertical-rl", letterSpacing: 2,
-                background: CARD_COLORS[rec.color] || COLORS.cobalt,
-              }}>{rec.spine}</div>
-              <div style={{ flex: 1 }}>
+        <div style={{ padding: "24px 20px 16px", borderTop: `3px double ${COLORS.rule}` }}>
+          <div style={{
+            fontFamily: F.ui, fontWeight: 700, fontSize: 9, letterSpacing: 4,
+            color: COLORS.muted, marginBottom: 16,
+          }}>{"\u4F60\u8FD8\u53EF\u4EE5\u8BFB\u2026"}</div>
+          <div style={{ display: "flex", gap: 10 }}>
+            {(R.recommendations || []).map((rec, i) => (
+              <div key={i} style={{
+                flex: 1, display: "flex", flexDirection: "column",
+                border: `1px solid ${COLORS.rule}`,
+                overflow: "hidden",
+                animation: `duleme-fade-up 0.4s ease ${i * 0.1}s both`,
+              }}>
                 <div style={{
-                  fontFamily: F.chinese, fontWeight: 700, fontSize: 15,
-                  letterSpacing: 0.5, color: COLORS.ink, lineHeight: 1.3,
-                }}>{rec.title}</div>
-                <div style={{
-                  fontFamily: F.ui, fontSize: 12, letterSpacing: 1,
-                  color: COLORS.muted, marginTop: 2,
-                }}>{rec.author}</div>
-                <p style={{
-                  fontFamily: F.chinese, fontSize: 14, lineHeight: 1.7,
-                  color: COLORS.muted, marginTop: 8, fontStyle: "italic",
+                  height: 96, position: "relative",
+                  background: CARD_COLORS[rec.color] || COLORS.cobalt,
+                  display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
-                  <Typewriter text={rec.why} active={isStreaming} />
-                </p>
+                  <div style={{
+                    position: "absolute", left: 0, top: 0, bottom: 0, width: 5,
+                    background: "rgba(0,0,0,0.18)",
+                  }} />
+                  <div style={{
+                    position: "absolute", right: -1, top: 2, bottom: 2, width: 3,
+                    background: `repeating-linear-gradient(to bottom, ${COLORS.paper} 0px, ${COLORS.paper} 1px, ${COLORS.paperDark} 1px, ${COLORS.paperDark} 2px)`,
+                  }} />
+                  <span style={{
+                    fontFamily: F.chinese, fontWeight: 900, fontSize: 12,
+                    color: COLORS.paper, writingMode: "vertical-rl",
+                    letterSpacing: 3, lineHeight: 1, position: "relative", zIndex: 1,
+                  }}>{rec.spine}</span>
+                </div>
+                <div style={{ padding: "10px 8px 0", flex: 1 }}>
+                  <div style={{
+                    fontFamily: F.chinese, fontWeight: 700, fontSize: 12,
+                    color: COLORS.ink, lineHeight: 1.3, marginBottom: 3,
+                  }}>{rec.title}</div>
+                  <div style={{
+                    fontFamily: F.ui, fontSize: 10, color: COLORS.muted,
+                    letterSpacing: 0.5, lineHeight: 1.4, marginBottom: 6,
+                  }}>{rec.author}</div>
+                  <p style={{
+                    fontFamily: F.chinese, fontSize: 11, lineHeight: 1.6,
+                    color: COLORS.muted, fontStyle: "italic", margin: 0,
+                  }}>{rec.why}</p>
+                </div>
+                <div style={{ padding: "10px 8px 10px" }}>
+                  <button style={{
+                    width: "100%", background: COLORS.ink, color: COLORS.goldLight,
+                    border: "none", padding: "7px 0",
+                    fontFamily: F.ui, fontSize: 9, fontWeight: 700,
+                    letterSpacing: 2, cursor: "pointer",
+                  }}>{"\u5F00\u59CB\u9605\u8BFB \u2192"}</button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </StreamIn>
 

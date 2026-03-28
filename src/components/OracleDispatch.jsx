@@ -257,7 +257,7 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
                     minHeight: LAYOUT.minTouchTarget,
                     cursor: "pointer", border: "none",
                     background: COLORS.goldLight, color: COLORS.ink,
-                  }}>{"\u8FD4\u56DE\u9996\u9875 \u2192"}</button>
+                  }}>{"\u5F00\u59CB\u9605\u8BFB \u2192"}</button>
                 </div>
               </div>
             )}
