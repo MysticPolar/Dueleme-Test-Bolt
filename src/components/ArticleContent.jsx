@@ -1,0 +1,236 @@
+import { COLORS, FONTS as F, CARD_COLORS } from "../styles/tokens.js";
+import { Typewriter } from "./Typewriter.jsx";
+
+function StreamIn({ children, visible }) {
+  if (!visible) return null;
+  return <div style={{ animation: "duleme-fade-up 0.4s ease both" }}>{children}</div>;
+}
+
+function SectionTag({ children, dark }) {
+  return (
+    <div style={{
+      fontFamily: F.ui, fontWeight: 700, fontSize: 9, letterSpacing: 4,
+      color: COLORS.paper,
+      background: dark ? COLORS.ink : COLORS.muted,
+      display: "inline-block", padding: "3px 12px", marginBottom: 16,
+    }}>{children}</div>
+  );
+}
+
+function PullQuote({ text, isStreaming }) {
+  return (
+    <div style={{
+      margin: "24px -20px",
+      padding: "24px 20px 24px 24px",
+      background: COLORS.paperDark,
+      borderLeft: `3px solid ${COLORS.rule}`,
+      borderTop: "1px solid rgba(42,31,14,0.06)",
+      borderBottom: "1px solid rgba(42,31,14,0.06)",
+      position: "relative",
+    }}>
+      <span style={{
+        position: "absolute", top: -14, left: 20,
+        fontSize: 72, color: COLORS.red, opacity: 0.2,
+        lineHeight: 1, fontWeight: 900, pointerEvents: "none",
+      }}>{"\u201C"}</span>
+      <span style={{
+        position: "absolute", bottom: -22, right: 20,
+        fontSize: 72, color: COLORS.red, opacity: 0.12,
+        lineHeight: 1, fontWeight: 900, pointerEvents: "none",
+      }}>{"\u201D"}</span>
+      <p style={{
+        fontFamily: F.chinese, fontSize: 16, lineHeight: 1.7,
+        color: COLORS.muted, fontStyle: "italic",
+        position: "relative", zIndex: 1, margin: 0,
+      }}>
+        <Typewriter text={text} active={isStreaming} speed={25} />
+      </p>
+    </div>
+  );
+}
+
+const BODY = {
+  fontFamily: "'Noto Serif SC', 'Playfair Display', serif",
+  fontSize: 16, lineHeight: 1.7, color: COLORS.ink,
+  textAlign: "justify", margin: 0,
+};
+
+export default function ArticleContent({ R, isStreaming, stamped }) {
+  if (!R) return null;
+
+  return (
+    <>
+      <div style={{ padding: "0 20px" }}>
+        {/* 壹 · 核心思想 */}
+        <StreamIn visible={R.body?.[0]}>
+          <div style={{ padding: "24px 0", borderBottom: "1px solid rgba(42,31,14,0.08)", animation: "duleme-fade-up 0.5s 0.15s ease both" }}>
+            <SectionTag>{"\u58F9 \u00B7 \u6838\u5FC3\u601D\u60F3"}</SectionTag>
+            <p style={BODY}>
+              <Typewriter text={R.body?.[0]} active={isStreaming} />
+            </p>
+            {R.body?.[1] && !R.bodyStrong1 && (
+              <p style={{ ...BODY, marginTop: "1em" }}>
+                <Typewriter text={R.body?.[1]} active={isStreaming} />
+              </p>
+            )}
+          </div>
+        </StreamIn>
+
+        {/* Pull Quote 1 */}
+        <StreamIn visible={R.pullQuote}>
+          <PullQuote text={R.pullQuote} isStreaming={isStreaming} />
+        </StreamIn>
+
+        {/* 观点 section */}
+        <StreamIn visible={R.bodyStrong1 || (R.body?.[1] && R.bodyStrong1)}>
+          {R.bodyStrong1 && (
+            <div style={{ padding: "24px 0", borderBottom: "1px solid rgba(42,31,14,0.08)", animation: "duleme-fade-up 0.5s 0.2s ease both" }}>
+              <div style={{
+                fontFamily: F.ui, fontSize: 9, fontWeight: 700,
+                letterSpacing: 4, color: COLORS.gold,
+                marginBottom: 8, display: "flex", alignItems: "center", gap: 8,
+              }}>
+                {"\u89C2\u70B9\u58F9"}
+                <span style={{ flex: 1, borderTop: "1px solid rgba(201,162,39,0.25)" }} />
+              </div>
+              <div style={{
+                fontFamily: F.chinese, fontWeight: 700, fontSize: 18,
+                lineHeight: 1.4, letterSpacing: 0.5, color: COLORS.ink,
+                marginBottom: 8,
+              }}>
+                <Typewriter text={R.bodyStrong1} active={isStreaming} />
+              </div>
+              {R.body?.[1] && (
+                <p style={BODY}>
+                  <Typewriter text={R.body?.[1]} active={isStreaming} />
+                </p>
+              )}
+            </div>
+          )}
+        </StreamIn>
+
+        {/* Pull Quote 2 */}
+        <StreamIn visible={R.pullQuote2}>
+          <PullQuote text={R.pullQuote2} isStreaming={isStreaming} />
+        </StreamIn>
+
+        {/* 值得思考的问题 */}
+        <StreamIn visible={R.reflectionQuestions?.length}>
+          <div style={{ padding: "24px 0", borderBottom: "1px solid rgba(42,31,14,0.08)" }}>
+            <SectionTag>{"\u8D30 \u00B7 \u503C\u5F97\u601D\u8003"}</SectionTag>
+            <ol style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              {(R.reflectionQuestions || []).map((q, i) => (
+                <li key={i} style={{
+                  ...BODY, textAlign: "left",
+                  padding: "12px 0 12px 28px", position: "relative",
+                  borderBottom: i < (R.reflectionQuestions?.length || 0) - 1 ? "1px solid rgba(42,31,14,0.06)" : "none",
+                }}>
+                  <span style={{
+                    position: "absolute", left: 0, top: 14,
+                    fontFamily: F.ui, fontSize: 11, fontWeight: 700,
+                    color: COLORS.gold, width: 20, height: 20,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    border: "1px solid rgba(201,162,39,0.3)",
+                  }}>{i + 1}</span>
+                  <Typewriter text={q} active={isStreaming} />
+                </li>
+              ))}
+            </ol>
+          </div>
+        </StreamIn>
+
+        {/* 关键收获 */}
+        <StreamIn visible={R.takeaways?.length}>
+          <div style={{ padding: "24px 0" }}>
+            <SectionTag>{"\u53C1 \u00B7 \u5173\u952E\u6536\u83B7"}</SectionTag>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              {(R.takeaways || []).map((line, i) => (
+                <li key={i} style={{
+                  ...BODY, textAlign: "left",
+                  padding: "8px 0 8px 20px", position: "relative",
+                  borderBottom: i < (R.takeaways?.length || 0) - 1 ? "1px solid rgba(42,31,14,0.08)" : "none",
+                }}>
+                  <span style={{
+                    position: "absolute", left: 0, top: 14,
+                    color: COLORS.gold, fontSize: 8,
+                  }}>{"\u25C6"}</span>
+                  <Typewriter text={line} active={isStreaming} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </StreamIn>
+
+        {/* Ornament */}
+        <div style={{
+          textAlign: "center", fontSize: 9, color: COLORS.muted,
+          letterSpacing: 12, padding: "24px 0 8px", opacity: 0.35,
+        }}>{"\u2726 \u25C6 \u2726"}</div>
+      </div>
+
+      {/* Recommendations */}
+      <StreamIn visible={R.recommendations?.length > 0}>
+        <div style={{ padding: "24px 20px 8px", borderTop: `3px double ${COLORS.rule}` }}>
+          <SectionTag dark>{"\u5EF6\u4F38\u63A8\u8350 \u00B7 \u732B\u5934\u9E70\u90AE\u5C40\u5907\u9009\u4E66\u76EE"}</SectionTag>
+          {(R.recommendations || []).map((rec, i) => (
+            <div key={i} style={{
+              marginBottom: 16, padding: 16,
+              borderBottom: i < R.recommendations.length - 1 ? "1px solid rgba(42,31,14,0.1)" : "none",
+              display: "flex", gap: 14, alignItems: "flex-start",
+              animation: `duleme-fade-up 0.4s ease ${i * 0.1}s both`,
+            }}>
+              <div style={{
+                width: 32, height: 46, flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontFamily: F.chinese, fontWeight: 700, fontSize: 8,
+                color: COLORS.paper, writingMode: "vertical-rl", letterSpacing: 2,
+                background: CARD_COLORS[rec.color] || COLORS.cobalt,
+              }}>{rec.spine}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  fontFamily: F.chinese, fontWeight: 700, fontSize: 15,
+                  letterSpacing: 0.5, color: COLORS.ink, lineHeight: 1.3,
+                }}>{rec.title}</div>
+                <div style={{
+                  fontFamily: F.ui, fontSize: 12, letterSpacing: 1,
+                  color: COLORS.muted, marginTop: 2,
+                }}>{rec.author}</div>
+                <p style={{
+                  fontFamily: F.chinese, fontSize: 14, lineHeight: 1.7,
+                  color: COLORS.muted, marginTop: 8, fontStyle: "italic",
+                }}>
+                  <Typewriter text={rec.why} active={isStreaming} />
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </StreamIn>
+
+      {/* Green Stamp */}
+      {stamped && (
+        <div style={{ display: "flex", justifyContent: "center", padding: "32px 0" }}>
+          <div style={{
+            display: "inline-block", padding: 4,
+            border: `1.5px solid ${COLORS.green}`,
+            transform: "rotate(-5deg)",
+            animation: "duleme-stamp 0.5s ease both",
+          }}>
+            <div style={{ border: `2px solid ${COLORS.green}`, padding: "8px 14px" }}>
+              <div style={{
+                fontFamily: F.chinese, fontWeight: 900, fontSize: 22,
+                color: COLORS.green, letterSpacing: 6, lineHeight: 1.2,
+                textAlign: "center",
+              }}>{"\u8BFB\u4E86\uFF01"}</div>
+              <div style={{
+                fontFamily: F.ui, fontSize: 7, letterSpacing: 2,
+                color: COLORS.green, opacity: 0.7, textAlign: "center",
+                marginTop: 2,
+              }}>{"\u732B\u5934\u9E70\u90AE\u5C40"}</div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

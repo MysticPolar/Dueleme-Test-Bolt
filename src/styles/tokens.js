@@ -190,21 +190,6 @@ export const GLOBAL_CSS = `
     animation: duleme-blink 0.7s step-end infinite;
   }
 
-  @keyframes duleme-blink {
-    0%, 100% { opacity: 0.8; }
-    50% { opacity: 0; }
-  }
-  .duleme-tw-cursor {
-    display: inline-block;
-    width: 2px;
-    height: 1.1em;
-    background: currentColor;
-    margin-left: 1px;
-    vertical-align: text-bottom;
-    opacity: 0.8;
-    animation: duleme-blink 0.7s step-end infinite;
-  }
-
   .duleme-root *::-webkit-scrollbar { display: none; }
   .duleme-root * { scrollbar-width: none; -webkit-tap-highlight-color: transparent; }
   .duleme-root input, .duleme-root button, .duleme-root textarea { -webkit-appearance: none; }
