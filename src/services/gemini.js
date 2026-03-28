@@ -3,6 +3,9 @@
 // The Owlery Press — Prompt Engineering + API Client
 // ═══════════════════════════════════════════════════════════════
 
+import { askOwleryStreamMock } from "./gemini-mock.js";
+
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 const GEMINI_KEY = import.meta.env.VITE_GEMINI_KEY || "";
 const MODEL = "gemini-2.5-flash";
 const STREAM_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:streamGenerateContent`;
@@ -240,6 +243,10 @@ function normalizeResponse(parsed) {
 // each time new fields become parseable, so the UI can render
 // the article progressively — no loading page.
 export async function askOwleryStream(questionText, mode = "normal", onPartial) {
+  if (USE_MOCK) {
+    return askOwleryStreamMock(questionText, mode, onPartial);
+  }
+
   if (!GEMINI_KEY) {
     console.warn("[duleme] No VITE_GEMINI_KEY set, using fallback response");
     onPartial(FALLBACK);
