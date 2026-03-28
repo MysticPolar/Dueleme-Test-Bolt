@@ -168,17 +168,19 @@ color字段只能是：cobalt, teal, coral, purple, gold, green。`,
 color字段只能是：cobalt, teal, coral, purple, gold, green。`,
 };
 
+function getSupabase() {
+  return createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+}
+
 let cachedGeminiKey: string | null = null;
 
 async function getGeminiKey(): Promise<string> {
   if (cachedGeminiKey) return cachedGeminiKey;
 
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-  );
-
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("app_config")
     .select("value")
     .eq("key", "GEMINI_API_KEY")
@@ -192,6 +194,58 @@ async function getGeminiKey(): Promise<string> {
   return cachedGeminiKey!;
 }
 
+async function hashQuestion(question: string, mode: string): Promise<string> {
+  const normalized = `${mode}:${question.trim().toLowerCase()}`;
+  const encoded = new TextEncoder().encode(normalized);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function getCachedResponse(
+  questionHash: string
+): Promise<Record<string, unknown> | null> {
+  const { data, error } = await getSupabase()
+    .from("cached_responses")
+    .select("response_json, created_at, ttl_hours")
+    .eq("question_hash", questionHash)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  const createdAt = new Date(data.created_at).getTime();
+  const ttlMs = (data.ttl_hours as number) * 60 * 60 * 1000;
+  if (Date.now() - createdAt > ttlMs) return null;
+
+  return data.response_json as Record<string, unknown>;
+}
+
+function writeCacheInBackground(
+  questionHash: string,
+  mode: string,
+  questionText: string,
+  responseJson: Record<string, unknown>
+) {
+  const promise = getSupabase()
+    .from("cached_responses")
+    .upsert(
+      {
+        question_hash: questionHash,
+        mode,
+        question_text: questionText,
+        response_json: responseJson,
+        created_at: new Date().toISOString(),
+        ttl_hours: 72,
+      },
+      { onConflict: "question_hash" }
+    )
+    .then(({ error }) => {
+      if (error) console.error("[cache-write]", error.message);
+    });
+
+  EdgeRuntime.waitUntil(promise);
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
@@ -200,11 +254,39 @@ Deno.serve(async (req: Request) => {
   try {
     const { question, mode = "normal" } = await req.json();
 
-    if (!question || typeof question !== "string" || question.trim().length === 0) {
+    if (
+      !question ||
+      typeof question !== "string" ||
+      question.trim().length === 0
+    ) {
       return new Response(
         JSON.stringify({ error: "question is required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
+    }
+
+    const questionHash = await hashQuestion(question, mode);
+
+    const cached = await getCachedResponse(questionHash);
+    if (cached) {
+      const ssePayload = `data: ${JSON.stringify({
+        candidates: [
+          { content: { parts: [{ text: JSON.stringify(cached) }] } },
+        ],
+      })}\n\ndata: [DONE]\n\n`;
+
+      return new Response(ssePayload, {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          "X-Cache": "HIT",
+        },
+      });
     }
 
     const geminiKey = await getGeminiKey();
@@ -229,24 +311,71 @@ Deno.serve(async (req: Request) => {
     if (!geminiRes.ok) {
       const errText = await geminiRes.text();
       return new Response(
-        JSON.stringify({ error: `Gemini API ${geminiRes.status}: ${errText.slice(0, 300)}` }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({
+          error: `Gemini API ${geminiRes.status}: ${errText.slice(0, 300)}`,
+        }),
+        {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     }
 
-    return new Response(geminiRes.body, {
+    const [streamForClient, streamForCache] =
+      geminiRes.body!.tee();
+
+    const cachePromise = (async () => {
+      const reader = streamForCache.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        for (const line of chunk.split("\n")) {
+          if (!line.startsWith("data: ")) continue;
+          const raw = line.slice(6).trim();
+          if (!raw || raw === "[DONE]") continue;
+          try {
+            const event = JSON.parse(raw);
+            const text = event.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) accumulated += text;
+          } catch {
+            /* skip */
+          }
+        }
+      }
+
+      try {
+        const parsed = JSON.parse(accumulated);
+        writeCacheInBackground(questionHash, mode, question.trim(), parsed);
+      } catch {
+        /* response wasn't valid JSON, don't cache */
+      }
+    })();
+
+    EdgeRuntime.waitUntil(cachePromise);
+
+    return new Response(streamForClient, {
       status: 200,
       headers: {
         ...corsHeaders,
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
         "Connection": "keep-alive",
+        "X-Cache": "MISS",
       },
     });
   } catch (err) {
     return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : "Internal error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({
+        error: err instanceof Error ? err.message : "Internal error",
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
     );
   }
 });
