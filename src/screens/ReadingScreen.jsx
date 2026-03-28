@@ -166,13 +166,48 @@ export default function ReadingScreen() {
               {openArticle.readTime} · {openArticle.date}
             </div>
           </div>
-          {/* Article body placeholder */}
-          <div style={{ fontFamily: F.chinese, fontSize: 14, lineHeight: 2, color: COLORS.ink }}>
-            {openArticle.preview}<br /><br />
-            心理学研究表明，人类对自己未来的规划往往存在系统性的偏差。我们倾向于认为，明天的自己会更有耐心，更有条理，更能抵抗诱惑。但事实上，"明天的自己"往往和今天的我们并没有太大区别。<br /><br />
-            这种现象被称为"计划谬误"。它不只影响个人决策，也影响集体项目、政府政策，乃至人类文明的整体走向。<br /><br />
-            也许，接受不完美的今天，比永远期待完美的明天，更接近智慧。
-          </div>
+          {openArticle.pullQuote && (
+            <div style={{
+              borderLeft: `3px solid ${CARD_COLORS[openArticle.color]}`,
+              paddingLeft: SPACE[4],
+              margin: `${SPACE[5]}px 0`,
+            }}>
+              <div style={{
+                fontFamily: F.display, fontStyle: "italic", fontSize: 15,
+                lineHeight: 1.7, color: COLORS.ink, letterSpacing: 0.3,
+              }}>
+                「{openArticle.pullQuote}」
+              </div>
+            </div>
+          )}
+
+          {(openArticle.body || [openArticle.preview]).map((para, i) => (
+            <div key={i} style={{
+              fontFamily: F.chinese, fontSize: 14, lineHeight: 2,
+              color: COLORS.ink, marginBottom: SPACE[4],
+            }}>
+              {para}
+            </div>
+          ))}
+
+          {openArticle.bookRec && (
+            <div style={{
+              border: `1px solid ${COLORS.paperAged}`,
+              borderLeft: `3px solid ${CARD_COLORS[openArticle.color]}`,
+              padding: `${SPACE[3]}px ${SPACE[4]}px`,
+              marginTop: SPACE[5],
+            }}>
+              <div style={{ fontFamily: F.ui, fontSize: 9, fontWeight: 700, letterSpacing: 2, color: COLORS.muted, marginBottom: SPACE[1] }}>
+                猫头鹰邮局推荐阅读
+              </div>
+              <div style={{ fontFamily: F.chinese, fontWeight: 700, fontSize: 13, color: COLORS.ink, marginBottom: 4 }}>
+                {openArticle.bookRec.title}
+              </div>
+              <div style={{ fontFamily: F.body, fontStyle: "italic", fontSize: 11, color: COLORS.muted, lineHeight: 1.5 }}>
+                {openArticle.bookRec.en}
+              </div>
+            </div>
+          )}
           <OrnateRule my={SPACE[6]} symbol="— 全文完 —" />
           <div style={{ textAlign: "center", fontFamily: F.body, fontStyle: "italic", fontSize: 11, color: COLORS.muted, opacity: 0.5 }}>
             "好书会有终章，好问题永不落幕。"<br />— 猫头鹰邮局
