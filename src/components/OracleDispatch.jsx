@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { COLORS, FONTS as F, TEXTURES, CARD_COLORS, SPACE, LAYOUT } from "../styles/tokens.js";
-import { CoinIcon } from "./Primitives.jsx";
 import { articleTagLabel } from "../utils/dispatchMeta.js";
 import { Typewriter, TypewriterEmpathy } from "./Typewriter.jsx";
 import ArticleContent from "./ArticleContent.jsx";
@@ -48,10 +47,11 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
   return (
     <div style={{
       position: "absolute", inset: 0, zIndex: 200,
-      ...TEXTURES.paper, overflow: "auto",
+      ...TEXTURES.paper,
       opacity: visible ? 1 : 0,
       transform: visible ? "translateY(0)" : "translateY(8px)",
       transition: "opacity 0.45s ease, transform 0.45s ease",
+      display: "flex", flexDirection: "column",
     }}>
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none",
@@ -59,7 +59,7 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
         zIndex: 0,
       }} />
 
-      <div style={{ position: "relative", zIndex: 2 }}>
+      <div style={{ position: "relative", zIndex: 2, flex: 1, overflow: "auto" }}>
         {/* ═══ MASTHEAD ═══ */}
         <div style={{ padding: "14px 20px 12px", borderBottom: `3px double ${COLORS.rule}` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
@@ -222,46 +222,6 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
             {/* Article Body + Recommendations + Green Stamp */}
             <ArticleContent R={R} isStreaming={isStreaming} stamped={stamped} />
 
-            {/* ═══ ACTION BAR ═══ */}
-            {isDone && (
-              <div style={{
-                background: COLORS.ink, padding: "12px 20px",
-                borderTop: "2px solid rgba(201,162,39,0.2)",
-                display: "flex", alignItems: "center",
-                justifyContent: "space-between", gap: 12,
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
-                  <CoinIcon size={26} />
-                  <div>
-                    <div style={{
-                      fontFamily: F.display, fontWeight: 900, fontSize: 15,
-                      color: COLORS.gold, letterSpacing: 1,
-                    }}>+{inkAmt} {"\u58A8\u6C34\u5DF2\u5230\u8D26"}</div>
-                    <div style={{
-                      fontFamily: F.body, fontStyle: "italic", fontSize: 10,
-                      color: COLORS.paperAged, opacity: 0.75, marginTop: 2,
-                    }}>{"\u732B\u5934\u9E70\u90AE\u5C40\u6DF1\u611F\u6B23\u6170\u3002\u706F\u8FD8\u4EAE\u7740\u3002"}</div>
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-                  <button type="button" style={{
-                    fontFamily: F.ui, fontSize: 9, letterSpacing: 2.5,
-                    padding: "0 14px", minHeight: LAYOUT.minTouchTarget,
-                    cursor: "pointer", background: "transparent",
-                    color: COLORS.paperAged,
-                    border: "1px solid rgba(232,197,71,0.25)",
-                  }}>{"\u6536\u85CF"}</button>
-                  <button type="button" onClick={onClose} style={{
-                    fontFamily: F.ui, fontSize: 9, fontWeight: 700,
-                    letterSpacing: 2.5, padding: "0 14px",
-                    minHeight: LAYOUT.minTouchTarget,
-                    cursor: "pointer", border: "none",
-                    background: COLORS.goldLight, color: COLORS.ink,
-                  }}>{"\u5F00\u59CB\u9605\u8BFB \u2192"}</button>
-                </div>
-              </div>
-            )}
-
             {/* ═══ FOLLOW-UP INPUT ═══ */}
             {isDone && (
               <div style={{ padding: "24px 20px 0", borderTop: `3px double ${COLORS.rule}` }}>
@@ -314,6 +274,40 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
           </>
         )}
       </div>
+
+      {/* ═══ STICKY ACTION BAR ═══ */}
+      {isDone && (
+        <div style={{
+          flexShrink: 0, position: "relative", zIndex: 3,
+          background: COLORS.ink, padding: "12px 20px",
+          borderTop: "2px solid rgba(201,162,39,0.2)",
+          display: "flex", alignItems: "center",
+          justifyContent: "space-between", gap: 12,
+        }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontFamily: F.body, fontStyle: "italic", fontSize: 10,
+              color: COLORS.paperAged, opacity: 0.75,
+            }}>{"\u732B\u5934\u9E70\u90AE\u5C40\u6DF1\u611F\u6B23\u6170\u3002\u706F\u8FD8\u4EAE\u7740\u3002"}</div>
+          </div>
+          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+            <button type="button" style={{
+              fontFamily: F.ui, fontSize: 9, letterSpacing: 2.5,
+              padding: "0 14px", minHeight: LAYOUT.minTouchTarget,
+              cursor: "pointer", background: "transparent",
+              color: COLORS.paperAged,
+              border: "1px solid rgba(232,197,71,0.25)",
+            }}>{"\u6536\u85CF"}</button>
+            <button type="button" onClick={onClose} style={{
+              fontFamily: F.ui, fontSize: 9, fontWeight: 700,
+              letterSpacing: 2.5, padding: "0 14px",
+              minHeight: LAYOUT.minTouchTarget,
+              cursor: "pointer", border: "none",
+              background: COLORS.goldLight, color: COLORS.ink,
+            }}>{"\u5F00\u59CB\u9605\u8BFB"}</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
