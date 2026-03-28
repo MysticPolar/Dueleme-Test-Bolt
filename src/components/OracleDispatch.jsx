@@ -2,10 +2,11 @@
 // 读了么 · Oracle Dispatch — AI-powered article layout
 // ═══════════════════════════════════════════════════════════════
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { COLORS, FONTS as F, TEXTURES, CARD_COLORS, SPACE, LAYOUT } from "../styles/tokens.js";
 import { CoinIcon } from "./Primitives.jsx";
 import { articleTagLabel } from "../utils/dispatchMeta.js";
+import { Typewriter, TypewriterEmpathy } from "./Typewriter.jsx";
 
 function RuleOrnate() {
   return (
@@ -203,10 +204,8 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
                   borderBottom: "1px solid rgba(42,31,14,0.12)",
                   paddingBottom: 10, marginBottom: 14,
                 }}>
-                  {R.empathyLine1}
-                  {R.empathyLine2 && <><br />{R.empathyLine2}</>}
-                  {R.empathyRed && <span style={{ color: COLORS.red }}>{R.empathyRed}</span>}
-                  {R.empathyLine2After}
+                  <Typewriter text={R.empathyLine1} active={isStreaming} speed={28} />
+                  {R.empathyLine2 && <><br /><TypewriterEmpathy line2={R.empathyLine2} red={R.empathyRed} after={R.empathyLine2After} active={isStreaming} speed={28} /></>}
                 </div>
               </StreamIn>
 
@@ -252,7 +251,7 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
                 <div style={{
                   fontFamily: F.chinese, fontSize: 12, lineHeight: 2.2,
                   color: COLORS.ink, letterSpacing: 0.4, marginBottom: 14,
-                }}>{R.body?.[0]}</div>
+                }}><Typewriter text={R.body?.[0]} active={isStreaming} /></div>
               </StreamIn>
 
               {/* Section 2 */}
@@ -266,8 +265,8 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
                   fontFamily: F.chinese, fontSize: 12, lineHeight: 2.2,
                   color: COLORS.ink, letterSpacing: 0.4, marginBottom: 14,
                 }}>
-                  {R.bodyStrong1 && <><strong style={{ fontWeight: 700 }}>{R.bodyStrong1}</strong><br /><br /></>}
-                  {R.body?.[1]}
+                  {R.bodyStrong1 && <><strong style={{ fontWeight: 700 }}><Typewriter text={R.bodyStrong1} active={isStreaming} /></strong><br /><br /></>}
+                  <Typewriter text={R.body?.[1]} active={isStreaming} />
                 </div>
               </StreamIn>
 
@@ -277,14 +276,14 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
                   borderLeft: `3px solid ${COLORS.rule}`, padding: "10px 16px", margin: "12px 0",
                   background: COLORS.paperDark, fontFamily: F.chinese, fontSize: 12,
                   lineHeight: 2, color: COLORS.muted, fontStyle: "italic", letterSpacing: 0.5,
-                }}>{R.pullQuote}</div>
+                }}><Typewriter text={R.pullQuote} active={isStreaming} speed={25} /></div>
               </StreamIn>
               <StreamIn visible={R.pullQuote2}>
                 <div style={{
                   borderLeft: `3px solid ${COLORS.rule}`, padding: "10px 16px", margin: "12px 0",
                   background: COLORS.paperDark, fontFamily: F.chinese, fontSize: 12,
                   lineHeight: 2, color: COLORS.muted, fontStyle: "italic", letterSpacing: 0.5,
-                }}>{R.pullQuote2}</div>
+                }}><Typewriter text={R.pullQuote2} active={isStreaming} speed={25} /></div>
               </StreamIn>
 
               <StreamIn visible={R.reflectionQuestions?.length}>
@@ -299,7 +298,7 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
                   color: COLORS.ink, letterSpacing: 0.4, marginBottom: 14,
                 }}>
                   {(R.reflectionQuestions || []).map((q, i) => (
-                    <span key={i}>{q}<br /></span>
+                    <span key={i}><Typewriter text={q} active={isStreaming} /><br /></span>
                   ))}
                 </div>
               </StreamIn>
@@ -321,7 +320,7 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
                       animation: "duleme-fade-up 0.3s ease both",
                     }}>
                       <span style={{ position: "absolute", left: 0, top: 10, color: COLORS.gold, fontSize: 8 }}>{"\u25C6"}</span>
-                      {line}
+                      <Typewriter text={line} active={isStreaming} />
                     </li>
                   ))}
                 </ul>
@@ -356,7 +355,7 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
                         <div style={{
                           fontFamily: F.chinese, fontSize: 11, lineHeight: 1.9, color: COLORS.muted,
                           marginTop: 5, letterSpacing: 0.4, fontStyle: "italic",
-                        }}>{rec.why}</div>
+                        }}><Typewriter text={rec.why} active={isStreaming} /></div>
                       </div>
                     </div>
                   ))}
