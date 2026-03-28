@@ -297,7 +297,7 @@ function ChallengeChip({ onOpenDispatch, userStats, onApplyChallengeReward, coin
 }
 
 // ── Main Home Screen ──────────────────────────────────────────
-export default function HomeScreen({ onOpenDispatch, userStats, onApplyChallengeReward }) {
+export default function HomeScreen({ onOpenDispatch, onSend, userStats, onApplyChallengeReward }) {
   const progress = getRankProgress(userStats.xpCurrent);
 
   return (
@@ -364,7 +364,7 @@ export default function HomeScreen({ onOpenDispatch, userStats, onApplyChallenge
           scrollSnapType: "x proximity",
         }}>
           {QUESTIONS.map((q, i) => (
-            <QuestionCard key={q.id} q={q} index={i} onClick={onOpenDispatch} />
+            <QuestionCard key={q.id} q={q} index={i} onClick={(card) => onSend(card.zh, "normal")} />
           ))}
         </div>
         <div style={{ textAlign: "center", marginTop: SPACE[3] }}>

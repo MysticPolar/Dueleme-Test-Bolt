@@ -193,6 +193,7 @@ export default function DulemeApp() {
           {page === "home" && (
             <HomeScreen
               onOpenDispatch={handleOpenDispatch}
+              onSend={handleSend}
               userStats={userStats}
               onApplyChallengeReward={handleApplyChallengeReward}
             />

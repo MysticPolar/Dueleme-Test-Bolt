@@ -81,15 +81,28 @@ export async function askOwleryStream(questionText, mode = "normal", onPartial) 
     return FALLBACK;
   }
 
-  const res = await fetch(PROXY_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-      "apikey": SUPABASE_ANON_KEY,
-    },
-    body: JSON.stringify({ question: questionText, mode }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+  let res;
+  try {
+    res = await fetch(PROXY_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "apikey": SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({ question: questionText, mode }),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === "AbortError") {
+      throw new Error("请求超时，请稍后再试。");
+    }
+    throw err;
+  }
 
   if (!res.ok) {
     const errBody = await res.text();
@@ -126,6 +139,8 @@ export async function askOwleryStream(questionText, mode = "normal", onPartial) 
       }
     }
   }
+
+  clearTimeout(timeoutId);
 
   let finalResult;
   try {
