@@ -49,6 +49,19 @@ function PullQuote({ text, isStreaming }) {
   );
 }
 
+function ViewpointLabel({ label }) {
+  return (
+    <div style={{
+      fontFamily: F.ui, fontSize: 9, fontWeight: 700,
+      letterSpacing: 4, color: COLORS.gold,
+      marginBottom: 8, display: "flex", alignItems: "center", gap: 8,
+    }}>
+      {label}
+      <span style={{ flex: 1, borderTop: "1px solid rgba(201,162,39,0.25)" }} />
+    </div>
+  );
+}
+
 const BODY = {
   fontFamily: "'Noto Serif SC', 'Playfair Display', serif",
   fontSize: 16, lineHeight: 1.7, color: COLORS.ink,
@@ -81,18 +94,11 @@ export default function ArticleContent({ R, isStreaming, stamped }) {
           <PullQuote text={R.pullQuote} isStreaming={isStreaming} />
         </StreamIn>
 
-        {/* 观点 section */}
-        <StreamIn visible={R.bodyStrong1 || (R.body?.[1] && R.bodyStrong1)}>
+        {/* 观点壹 */}
+        <StreamIn visible={R.bodyStrong1}>
           {R.bodyStrong1 && (
             <div style={{ padding: "24px 0", borderBottom: "1px solid rgba(42,31,14,0.08)", animation: "duleme-fade-up 0.5s 0.2s ease both" }}>
-              <div style={{
-                fontFamily: F.ui, fontSize: 9, fontWeight: 700,
-                letterSpacing: 4, color: COLORS.gold,
-                marginBottom: 8, display: "flex", alignItems: "center", gap: 8,
-              }}>
-                {"\u89C2\u70B9\u58F9"}
-                <span style={{ flex: 1, borderTop: "1px solid rgba(201,162,39,0.25)" }} />
-              </div>
+              <ViewpointLabel label={"\u89C2\u70B9\u58F9"} />
               <div style={{
                 fontFamily: F.chinese, fontWeight: 700, fontSize: 18,
                 lineHeight: 1.4, letterSpacing: 0.5, color: COLORS.ink,
@@ -109,9 +115,51 @@ export default function ArticleContent({ R, isStreaming, stamped }) {
           )}
         </StreamIn>
 
-        {/* Pull Quote 2 */}
+        {/* Pull Quote 1 between 观点壹 and 观点贰 */}
         <StreamIn visible={R.pullQuote2}>
           <PullQuote text={R.pullQuote2} isStreaming={isStreaming} />
+        </StreamIn>
+
+        {/* 观点贰 */}
+        <StreamIn visible={R.bodyStrong2}>
+          {R.bodyStrong2 && (
+            <div style={{ padding: "24px 0", borderBottom: "1px solid rgba(42,31,14,0.08)", animation: "duleme-fade-up 0.5s 0.25s ease both" }}>
+              <ViewpointLabel label={"\u89C2\u70B9\u8D30"} />
+              <div style={{
+                fontFamily: F.chinese, fontWeight: 700, fontSize: 18,
+                lineHeight: 1.4, letterSpacing: 0.5, color: COLORS.ink,
+                marginBottom: 8,
+              }}>
+                <Typewriter text={R.bodyStrong2} active={isStreaming} />
+              </div>
+              {R.body?.[2] && (
+                <p style={BODY}>
+                  <Typewriter text={R.body?.[2]} active={isStreaming} />
+                </p>
+              )}
+            </div>
+          )}
+        </StreamIn>
+
+        {/* 观点叁 */}
+        <StreamIn visible={R.bodyStrong3}>
+          {R.bodyStrong3 && (
+            <div style={{ padding: "24px 0", borderBottom: "1px solid rgba(42,31,14,0.08)", animation: "duleme-fade-up 0.5s 0.3s ease both" }}>
+              <ViewpointLabel label={"\u89C2\u70B9\u53C1"} />
+              <div style={{
+                fontFamily: F.chinese, fontWeight: 700, fontSize: 18,
+                lineHeight: 1.4, letterSpacing: 0.5, color: COLORS.ink,
+                marginBottom: 8,
+              }}>
+                <Typewriter text={R.bodyStrong3} active={isStreaming} />
+              </div>
+              {R.body?.[3] && (
+                <p style={BODY}>
+                  <Typewriter text={R.body?.[3]} active={isStreaming} />
+                </p>
+              )}
+            </div>
+          )}
         </StreamIn>
 
         {/* 值得思考的问题 */}

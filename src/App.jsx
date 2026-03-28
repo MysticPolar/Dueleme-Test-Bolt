@@ -13,6 +13,7 @@ import { InkToast } from "./components/Primitives.jsx";
 import HomeScreen from "./screens/HomeScreen.jsx";
 import ReadingScreen from "./screens/ReadingScreen.jsx";
 import ProfileScreen from "./screens/ProfileScreen.jsx";
+import SplashScreen from "./screens/SplashScreen.jsx";
 import { USER_STATS } from "./data/content.js";
 import { readSoftwareCreatedAt } from "./utils/softwareCreatedAt.js";
 import { loadUserStats, saveUserStats } from "./utils/storage.js";
@@ -40,7 +41,7 @@ const STAT_DEFAULTS = {
 
 export default function DulemeApp() {
   const [userStats, setUserStats] = useState(() => loadUserStats(STAT_DEFAULTS));
-  const [page, setPage] = useState("home");
+  const [page, setPage] = useState("splash");
   const [dispatch, setDispatch] = useState(null);
   const [tagSeenArticles, setTagSeenArticles] = useState(() => loadTagSeenArticles());
   const [toast, setToast] = useState(null);
@@ -167,7 +168,7 @@ export default function DulemeApp() {
           ? "0 0 60px rgba(42,31,14,0.2)" : "none",
       }}
     >
-      {!(page === "home" && dispatch) && (
+      {page !== "splash" && !(page === "home" && dispatch) && (
         <Masthead
           loginDays={userStats.loginDays ?? userStats.streakDays}
           foundingDate={userStats.softwareCreatedAt ?? userStats.accountCreatedAt}
@@ -189,7 +190,10 @@ export default function DulemeApp() {
           zIndex: 1,
         }} />
 
-        <div style={{ position: "relative", zIndex: 2, height: page === "home" ? "100%" : "auto" }}>
+        <div style={{ position: "relative", zIndex: 2, height: page === "home" || page === "splash" ? "100%" : "auto" }}>
+          {page === "splash" && (
+            <SplashScreen onEnter={() => setPage("home")} />
+          )}
           {page === "home" && (
             <HomeScreen
               onOpenDispatch={handleOpenDispatch}
@@ -225,7 +229,7 @@ export default function DulemeApp() {
         </div>
       )}
 
-      <NavBar activePage={page} onNavigate={handleNavigate} />
+      {page !== "splash" && <NavBar activePage={page} onNavigate={handleNavigate} />}
     </div>
   );
 }
