@@ -2,9 +2,12 @@
 // 读了么 · Profile Screen (我的)
 // ═══════════════════════════════════════════════════════════════
 
+import { useState } from "react";
 import { AVATARS, RANKS, TAG_VOLUMES, getRankProgress } from "../data/content.js";
 import { COLORS, FONTS as F, SPACE, LAYOUT } from "../styles/tokens.js";
 import { OrnateRule, SectionLabel, ScholarAvatar, CoinIcon } from "../components/Primitives.jsx";
+import CalendarPanel from "../components/panels/CalendarPanel.jsx";
+import CollectionsPanel from "../components/panels/CollectionsPanel.jsx";
 
 // ── Settings Row ──────────────────────────────────────────────
 function SettingRow({ icon, label, sub, value }) {
@@ -81,6 +84,70 @@ function HexRadar({ data, size = 220 }) {
         );
       })}
     </svg>
+  );
+}
+
+const TABS = [
+  { id: "radar", label: "六维度" },
+  { id: "calendar", label: "阅历" },
+  { id: "collections", label: "收藏" },
+];
+
+function TabStrip({ active, onChange }) {
+  return (
+    <div style={{ display: "flex", borderBottom: `1px solid rgba(42,31,14,0.12)`, marginBottom: 16 }}>
+      {TABS.map(tab => {
+        const isActive = tab.id === active;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => onChange(tab.id)}
+            style={{
+              flex: 1, background: "none", border: "none", cursor: "pointer",
+              padding: "9px 0",
+              fontFamily: F.chinese, fontWeight: isActive ? 700 : 400,
+              fontSize: 12, letterSpacing: 1.5,
+              color: isActive ? COLORS.ink : COLORS.muted,
+              borderBottom: isActive ? `2px solid ${COLORS.gold}` : "2px solid transparent",
+              marginBottom: -1,
+              transition: "color 0.2s ease, border-color 0.2s ease",
+            }}
+          >
+            {tab.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function DimensionPanel() {
+  const [activeTab, setActiveTab] = useState("radar");
+  const [collectionsRefresh, setCollectionsRefresh] = useState(0);
+
+  const handleTabChange = (id) => {
+    setActiveTab(id);
+    if (id === "collections") setCollectionsRefresh(n => n + 1);
+  };
+
+  return (
+    <div style={{ marginBottom: 18, animation: "duleme-fade-up 0.4s ease 0.2s both" }}>
+      <TabStrip active={activeTab} onChange={handleTabChange} />
+
+      {activeTab === "radar" && (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <HexRadar data={TAG_VOLUMES} size={240} />
+        </div>
+      )}
+
+      {activeTab === "calendar" && (
+        <CalendarPanel />
+      )}
+
+      {activeTab === "collections" && (
+        <CollectionsPanel refresh={collectionsRefresh} />
+      )}
+    </div>
   );
 }
 
@@ -183,11 +250,7 @@ export default function ProfileScreen({ userStats = {} }) {
 
       <OrnateRule symbol="✦ 六维图 ✦" />
 
-      {/* Hex Radar — 卷 per tag */}
-      <SectionLabel>六维图 · 阅读维度</SectionLabel>
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 18, animation: "duleme-fade-up 0.4s ease 0.2s both" }}>
-        <HexRadar data={TAG_VOLUMES} size={240} />
-      </div>
+      <DimensionPanel />
 
       <OrnateRule symbol="— ✦ 等级之路 ✦ —" />
 

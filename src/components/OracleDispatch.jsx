@@ -3,6 +3,7 @@ import { COLORS, FONTS as F, TEXTURES, CARD_COLORS, SPACE, LAYOUT } from "../sty
 import { articleTagLabel } from "../utils/dispatchMeta.js";
 import { Typewriter, TypewriterEmpathy } from "./Typewriter.jsx";
 import ArticleContent from "./ArticleContent.jsx";
+import { saveReadingEntry, saveCollection } from "../utils/db.js";
 
 function StreamIn({ children, visible }) {
   if (!visible) return null;
@@ -13,6 +14,7 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
   const [visible, setVisible] = useState(false);
   const [stamped, setStamped] = useState(false);
   const [followUp, setFollowUp] = useState("");
+  const [collected, setCollected] = useState(false);
 
   const isStreaming = question?.streaming;
   const hasError = question?.error && !question?.response?.empathyLine1;
@@ -38,6 +40,36 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
         window.dispatchEvent(new CustomEvent("duleme-prefill-send", { detail: { text, mode: "normal" } }));
       }, 120);
     }
+  };
+
+  const handleCollect = async () => {
+    if (collected || !R) return;
+    setCollected(true);
+    try {
+      await saveCollection({
+        type: "dispatch",
+        title: R.empathyLine1 || "",
+        subtitle: R.bookRec?.title || "",
+        content: R.empathyLine2 || "",
+        tag: question?.tag || "",
+        color: question?.color || "",
+      });
+    } catch { setCollected(false); }
+  };
+
+  const handleStartReading = async () => {
+    if (R) {
+      try {
+        await saveReadingEntry({
+          question_text: question?.zh || "",
+          book_title: R.bookRec?.title || "",
+          book_author: R.bookRec?.en || "",
+          tag: question?.tag || "",
+          color: question?.color || "",
+        });
+      } catch { /* non-blocking */ }
+    }
+    onClose();
   };
 
   const accentColor = CARD_COLORS[question?.color] || COLORS.coral;
@@ -291,14 +323,15 @@ export default function OracleDispatch({ question, onClose, onRetry, issueKan = 
             }}>{"\u732B\u5934\u9E70\u90AE\u5C40\u6DF1\u611F\u6B23\u6170\u3002\u706F\u8FD8\u4EAE\u7740\u3002"}</div>
           </div>
           <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-            <button type="button" style={{
+            <button type="button" onClick={handleCollect} style={{
               fontFamily: F.ui, fontSize: 9, letterSpacing: 2.5,
               padding: "0 14px", minHeight: LAYOUT.minTouchTarget,
-              cursor: "pointer", background: "transparent",
-              color: COLORS.paperAged,
-              border: "1px solid rgba(232,197,71,0.25)",
-            }}>{"\u6536\u85CF"}</button>
-            <button type="button" onClick={onClose} style={{
+              cursor: collected ? "default" : "pointer", background: "transparent",
+              color: collected ? COLORS.gold : COLORS.paperAged,
+              border: `1px solid ${collected ? "rgba(201,162,39,0.6)" : "rgba(232,197,71,0.25)"}`,
+              transition: "color 0.3s ease, border-color 0.3s ease",
+            }}>{collected ? "\u2665 \u5DF2\u6536\u85CF" : "\u6536\u85CF"}</button>
+            <button type="button" onClick={handleStartReading} style={{
               fontFamily: F.ui, fontSize: 9, fontWeight: 700,
               letterSpacing: 2.5, padding: "0 14px",
               minHeight: LAYOUT.minTouchTarget,
