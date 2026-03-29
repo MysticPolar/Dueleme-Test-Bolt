@@ -89,7 +89,7 @@ function HexRadar({ data, size = 220 }) {
 
 const TABS = [
   { id: "radar", label: "六维度" },
-  { id: "calendar", label: "阅历" },
+  { id: "calendar", label: "日历" },
   { id: "collections", label: "收藏" },
 ];
 
@@ -248,7 +248,7 @@ export default function ProfileScreen({ userStats = {} }) {
         </div>
       </div>
 
-      <OrnateRule symbol="✦ 六维图 ✦" />
+      <OrnateRule symbol="✦ 我的阅历 ✦" />
 
       <DimensionPanel />
 
